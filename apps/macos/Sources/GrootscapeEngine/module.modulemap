@@ -1,5 +1,0 @@
-module GrootscapeEngine [system] {
-    header "grootscape_engine.h"
-    link "grootscape_engine"
-    export *
-}

@@ -1,34 +1,70 @@
 # Grootscape
 
-Grootscape is a self-hosted multiplayer RPG. The first-party client and game engine are written in Rust. An authoritative C# server runs on .NET 10. The MVP targets macOS, Windows, Linux, Android, and the browser. iOS follows the MVP.
+Grootscape is a self-hosted multiplayer RPG. An authoritative C# server runs on .NET 10. The client engine and renderer are written in Rust and run on macOS, Windows, Linux, Android, and the browser. iOS follows the MVP.
 
-The current foundation builds the C# server, shared Rust engine, Rust desktop executable, and Swift macOS app. The desktop executable and macOS window report the engine version. The server exposes a liveness endpoint. The [architecture](docs/architecture.md) maps each build target to its source and defines the runtime boundaries. Planned work is tracked in [GitHub Issues](https://github.com/berniemackie97/grootscape/issues).
+The foundation runs end to end: the server ticks the world, accepts WebSocket clients through a versioned handshake, and exposes health probes and OpenTelemetry. The desktop and browser clients open a `wgpu` surface and render, and the macOS and Android apps link the same engine. The [architecture](docs/architecture.md) maps every build target to its source. Planned work is tracked in [GitHub Issues](https://github.com/berniemackie97/grootscape/issues).
 
 ## Prerequisites
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0). The minimum is `10.0.403`. CI uses `10.0.404`.
-- [Rustup](https://rustup.rs/). The repository pins Rust, rustfmt, and Clippy in `rust-toolchain.toml`. A matching system installation works as well.
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0), `10.0.403` or later. CI uses `10.0.404`.
+- [Rustup](https://rustup.rs/). `rust-toolchain.toml` pins Rust, rustfmt, and Clippy.
+- For the browser client: `rustup target add wasm32-unknown-unknown` and `cargo install wasm-bindgen-cli --version 0.2.130 --locked`.
+- For the Android app: Android Studio or the Android SDK with an NDK, JDK 17, `rustup target add aarch64-linux-android x86_64-linux-android`, and `cargo install cargo-ndk --version 4.1.2 --locked`.
+- For the macOS app: Xcode or the Command Line Tools.
+- For the server image: Docker.
 
 ## Run locally
 
+### Server
+
 ```sh
-cargo run --locked --package grootscape-client -- --version
 dotnet restore Grootscape.slnx --locked-mode
-dotnet run --project src/Grootscape.Server --no-restore -- --urls http://127.0.0.1:5080
+dotnet run --project src/server/Grootscape.Server --no-restore -- --urls http://127.0.0.1:5080
 ```
 
-In a second terminal, run `curl --fail http://127.0.0.1:5080/health/live`. The host returns `Healthy`.
+`curl http://127.0.0.1:5080/health/ready` returns `Healthy` once the world has ticked. Clients connect to `ws://127.0.0.1:5080/play`. To run the container instead:
+
+```sh
+docker build --file deploy/server.Dockerfile --tag grootscape-server .
+docker run --rm --publish 8080:8080 grootscape-server
+```
+
+### Desktop client (Windows, Linux, macOS)
+
+```sh
+cargo run --locked --package grootscape-desktop
+```
+
+The log names the GPU and backend. `--exit-after-frames <count>` closes the window after that many frames, for smoke tests.
+
+### Browser client
+
+```sh
+cargo build --locked --release --package grootscape-web --target wasm32-unknown-unknown
+wasm-bindgen --target web --no-typescript --out-dir apps/web/pkg target/wasm32-unknown-unknown/release/grootscape_web.wasm
+python3 -m http.server 8765 --directory apps/web
+```
+
+Open <http://localhost:8765>. The status line shows the engine version and whether the browser uses WebGPU or WebGL.
 
 ### macOS app
 
-With Xcode or the Command Line Tools installed, build the engine and run the Swift app from the repository root.
-
 ```sh
-cargo build --locked --release --target-dir target --package grootscape-engine
+cargo build --locked --release --package grootscape-native
 swift run --package-path apps/macos GrootscapeMac
 ```
 
-Open `apps/macos/Package.swift` in Xcode to work on the macOS app after building the engine. Open `Grootscape.slnx` for the server and the repository root for the Cargo workspace.
+Open `apps/macos/Package.swift` in Xcode to work on the app after building the engine.
+
+### Android app
+
+Open `apps/android` in Android Studio and run the `app` configuration, or build from the command line:
+
+```sh
+cd apps/android && ./gradlew assembleDebug
+```
+
+Gradle builds the engine for each ABI with `cargo-ndk` before packaging.
 
 ## Verify a change
 
@@ -36,7 +72,6 @@ Open `apps/macos/Package.swift` in Xcode to work on the macOS app after building
 cargo fmt --all --check
 cargo clippy --workspace --all-targets --locked -- -D warnings
 cargo test --workspace --locked
-cargo run --locked --package grootscape-client -- --version
 
 dotnet restore Grootscape.slnx --locked-mode
 dotnet format Grootscape.slnx --verify-no-changes --no-restore
@@ -44,4 +79,4 @@ dotnet build Grootscape.slnx --configuration Release --no-restore
 dotnet test --solution Grootscape.slnx --configuration Release --no-build
 ```
 
-GitHub Actions runs the Rust and .NET checks on Linux, macOS, and Windows. The macOS job also builds the Swift app and checks the engine version through the C interface. Commit the affected lockfile with any dependency change. See [AGENTS.md](AGENTS.md) for the contribution rules.
+GitHub Actions also runs the Rust and .NET checks on Linux, macOS, and Windows, smoke-tests the desktop window and the Swift app on macOS, builds the browser client and the Android APK, and probes the server container. Commit the affected lockfile with any dependency change. See [AGENTS.md](AGENTS.md) for the contribution rules and [SECURITY.md](SECURITY.md) to report a vulnerability.

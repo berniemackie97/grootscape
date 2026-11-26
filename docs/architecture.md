@@ -1,28 +1,62 @@
 # Architecture
 
-Grootscape has one world server, one shared client engine, and platform-specific launch targets. The server owns the world. Clients send player intent and present authoritative state. Each platform host owns its window or surface, input, and app lifecycle.
+Grootscape has one world server, one shared client engine, and a thin host per platform. The server owns the world. Clients send player intent and present authoritative state. Each host owns its window or surface, input, and app lifecycle, and forwards them to the engine.
 
-| Build target | Source | Responsibility |
+```
+apps/            platform hosts (Swift, Kotlin, browser page)
+deploy/          container build for the server
+docs/            architecture and decisions
+protocol/        wire contract: specification and shared fixtures
+src/client/      Rust crates (engine, protocol codec, hosts, FFI)
+src/server/      C# projects (host, world rules, protocol codec)
+tests/server/    C# test projects, one per server project
+```
+
+## Build targets
+
+| Target | Source | Responsibility |
 |---|---|---|
-| `Grootscape.Server` | `src/Grootscape.Server` | C# world server and ASP.NET Core entry point. |
-| `grootscape-engine` | `src/grootscape-engine` | Rust library shared by the native clients. It supplies the build version today. Rendering, assets, input mapping, and presentation belong here as they land. |
-| `grootscape-client` | `src/grootscape-client` | Rust desktop executable. Its current entry point verifies that the engine links and reports its version. |
-| `GrootscapeMac` | `apps/macos` | Swift app that links the Rust engine and displays its version in a window. |
+| `Grootscape.Server` | `src/server/Grootscape.Server` | The only deployable server. ASP.NET Core host that wires features together: `World/` runs the tick loop, `Network/` runs client sessions, `Health/` serves probes, `Observability/` configures logs, metrics, and traces. |
+| `Grootscape.World` | `src/server/Grootscape.World` | Game rules and world state. No references to ASP.NET, sockets, or storage. |
+| `Grootscape.Protocol` | `src/server/Grootscape.Protocol` | Server side of the wire codec. |
+| `grootscape-engine` | `src/client/grootscape-engine` | Shared client engine: the `wgpu` renderer today; assets, input mapping, scene, and overlays as they land. |
+| `grootscape-protocol` | `src/client/grootscape-protocol` | Client side of the wire codec. No dependencies. |
+| `grootscape-desktop` | `src/client/grootscape-desktop` | `grootscape-client` executable for Windows, Linux, and macOS. Owns the `winit` window and event loop. |
+| `grootscape-web` | `src/client/grootscape-web` | WebAssembly bindings the browser host calls. |
+| `grootscape-native` | `src/client/grootscape-native` | C interface (`include/grootscape.h`) for Apple hosts and JNI methods for Android. |
+| `GrootscapeMac` | `apps/macos` | Swift app that links `grootscape-native` statically. |
+| Android app | `apps/android` | Kotlin app that loads `libgrootscape_native.so`, built per ABI by `cargo-ndk` from Gradle. |
+| Browser page | `apps/web` | Static page that sizes the canvas, drives the frame loop, and loads `grootscape-web`. |
+
+Dependencies point inward. Hosts depend on the engine; the engine depends on no host. The server host depends on `Grootscape.World` and `Grootscape.Protocol`, which depend on nothing in the solution.
 
 ## Server
 
-Keep a single deployable server and organize features in folders inside it. Put tick progression, movement, collision, and other game rules in `World`. Put session lifecycle and packet handling in `Network`. Put real database adapters and migrations in `Persistence` when the first save ships. `Program.cs` wires the host together.
+`Program.cs` only wires features. Each feature folder registers its own services, options, and health checks through one extension method.
 
-The world loop owns mutation. Network handlers deliver player intent to the loop, which applies commands in a defined order. Network and disk I/O run outside the tick. Keep the rules callable without ASP.NET, sockets, or a database so tests can drive them with explicit tick inputs. Existing host-level tests live in `tests/Grootscape.Server.Tests`.
+The world loop is the single writer of world state. It runs as a hosted service on a `PeriodicTimer` driven by the injected `TimeProvider`, so tests control time. A tick that runs long is logged and counted, and the timer coalesces missed ticks instead of running them back to back. Network handlers will hand player intent to the loop through a queue that the loop drains at the start of each tick; socket and disk I/O stay outside the tick.
+
+Configuration is bound to options classes and validated at startup, so a bad value stops the process before it serves traffic. `appsettings.json` holds the defaults:
+
+| Section | Setting | Default |
+|---|---|---|
+| `World` | `TickDurationMs` | 600 |
+| `Network` | `HandshakeTimeoutMs`, `CloseTimeoutMs` | 5000, 2000 |
+| `Network` | `KeepAliveIntervalSeconds` | 30 |
+| `Network` | `AllowedOrigins` | empty (any origin) |
+
+Production logs are JSON on stdout. OpenTelemetry collects ASP.NET Core, runtime, and `Grootscape.Server` metrics (`grootscape.world.*`, `grootscape.network.*`) and request traces; setting the standard `OTEL_EXPORTER_OTLP_ENDPOINT` exports logs, metrics, and traces over OTLP.
+
+`/health/live` answers while the process runs. `/health/ready` answers once the world has ticked and stays healthy while it keeps ticking. On shutdown the server closes open sessions with status 1001 and stops the world loop.
+
+`deploy/server.Dockerfile` publishes the server onto the chiseled ASP.NET image, which has no shell and runs as a non-root user on port 8080.
+
+## Wire protocol
+
+All clients, including the browser, connect with a WebSocket to `/play`. [`protocol/README.md`](../protocol/README.md) specifies the messages and close codes, and `protocol/fixtures/v1.json` holds the exact bytes both codecs test against. Version 1 is the handshake; movement arrives with [#2](https://github.com/berniemackie97/grootscape/issues/2). Codecs translate at each runtime's boundary, so world objects, persistence records, and graphics types stay out of the wire format.
 
 ## Client
 
-Keep shared gameplay presentation and the `wgpu` renderer in the engine. The Rust desktop executable will host Windows and Linux. The macOS app already links the same engine through a small C interface. The Android Kotlin host will link the engine and own its surface lifecycle. The browser client is a TypeScript target that starts from TSPS. iOS follows the MVP.
+The renderer opens a `wgpu` device for whatever surface the host provides: Metal on macOS, Vulkan or DirectX 12 on Windows, Vulkan or GL on Linux, and WebGPU with a WebGL 2 fallback in the browser. Hosts report the chosen backend at startup. The Android host links the same engine through JNI; rendering into its `SurfaceView` follows with [#3](https://github.com/berniemackie97/grootscape/issues/3). Scene rendering and tile picking follow with [#1](https://github.com/berniemackie97/grootscape/issues/1), and the first overlay with [#5](https://github.com/berniemackie97/grootscape/issues/5). iOS follows the MVP and will reuse `grootscape-native`.
 
-The first windowed renderer and tile-picking work is tracked in [#1](https://github.com/berniemackie97/grootscape/issues/1). Android and browser integration are tracked in [#3](https://github.com/berniemackie97/grootscape/issues/3) and [#4](https://github.com/berniemackie97/grootscape/issues/4).
-
-## Wire and content
-
-The client and server meet at a versioned wire contract. Define its first messages and language-neutral fixtures with [the movement slice](https://github.com/berniemackie97/grootscape/issues/2). Codecs translate at each runtime's boundary. Keep world objects, persistence records, and graphics types outside the wire format.
-
-Pin the TSPS revision for browser compatibility work. Preserve license notices for reused components. Use original or appropriately licensed assets in engine and server fixtures. Put shared in-game overlays in the engine, starting with [Tile Indicators](https://github.com/berniemackie97/grootscape/issues/5).
+TSPS is a behavior reference. Pin the upstream revision for any compatibility claim, preserve license notices for reused components, and use original or appropriately licensed assets in the repository and test fixtures.

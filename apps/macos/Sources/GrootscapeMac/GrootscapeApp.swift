@@ -1,4 +1,4 @@
-import GrootscapeEngine
+import GrootscapeNative
 import SwiftUI
 
 @main
