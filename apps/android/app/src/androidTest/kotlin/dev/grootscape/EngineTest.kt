@@ -7,7 +7,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Runs on a device or emulator and proves the packaged Rust engine loads through JNI. */
+/** Runs on a device or emulator and proves the packaged C++ engine loads through JNI. */
 @RunWith(AndroidJUnit4::class)
 class EngineTest {
     @Test

@@ -1,82 +1,85 @@
 # Grootscape
 
-Grootscape is a self-hosted multiplayer RPG. An authoritative C# server runs on .NET 10. The client engine and renderer are written in Rust and run on macOS, Windows, Linux, Android, and the browser. iOS follows the MVP.
+Grootscape is a self-hosted multiplayer RPG. The authoritative server uses C# and .NET 10. The client foundation uses C++23. Desktop and browser hosts render a clear screen; Android and Swift macOS hosts report the shared engine version. Gameplay and mobile scene rendering remain planned work in [GitHub Issues](https://github.com/berniemackie97/grootscape/issues).
 
-The foundation runs end to end: the server ticks the world, accepts WebSocket clients through a versioned handshake, and exposes health probes and OpenTelemetry. The desktop and browser clients open a `wgpu` surface and render, and the macOS and Android apps link the same engine. The [architecture](docs/architecture.md) maps every build target to its source. Planned work is tracked in [GitHub Issues](https://github.com/berniemackie97/grootscape/issues).
+## Build and run
 
-## Prerequisites
-
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0), `10.0.403` or later. CI uses `10.0.404`.
-- [Rustup](https://rustup.rs/). `rust-toolchain.toml` pins Rust, rustfmt, and Clippy.
-- For the browser client: `rustup target add wasm32-unknown-unknown` and `cargo install wasm-bindgen-cli --version 0.2.130 --locked`.
-- For the Android app: Android Studio or the Android SDK, JDK 17, `rustup target add aarch64-linux-android x86_64-linux-android`, and `cargo install cargo-ndk --version 4.1.2 --locked`. Gradle installs the pinned NDK.
-- For the macOS app: Xcode or the Command Line Tools.
-- For the server image: Docker.
-
-## Run locally
-
-### Server
+Install CMake 3.28 or later, Ninja, Python 3, and a C++23 compiler (Apple Clang 21, Clang 18, or Visual Studio 2022 or later). Use an MSVC developer shell on Windows. CMake downloads SDL3 by commit and verifies its SHA-256. First configuration needs network access. CLion can open the root directory and use the checked-in presets.
 
 ```sh
-dotnet restore Grootscape.slnx --locked-mode
-dotnet run --project src/server/Grootscape.Server --no-restore -- --urls http://127.0.0.1:5080
+cmake --preset dev
+cmake --build --preset dev
+ctest --preset dev
+build/dev/grootscape-client --exit-after-frames 3
 ```
 
-`curl http://127.0.0.1:5080/health/ready` returns `Healthy` once the world has ticked. Clients connect to `ws://127.0.0.1:5080/play`. To run the container instead:
+Windows executables have an `.exe` suffix. Omit the frame limit for normal use. `--version` and `--help` do not initialize graphics. Linux needs development packages for X11 and OpenGL; CI lists the packages. Set `SDL_RENDER_DRIVER=software` for software rendering. The host reports its selected backend.
+
+Install .NET SDK 10.0.403 or later (CI uses 10.0.404). Start the server with:
 
 ```sh
-docker build --file deploy/server.Dockerfile --tag grootscape-server .
-docker run --rm --publish 8080:8080 grootscape-server
+dotnet run --project src/server/Grootscape.Server
 ```
-
-### Desktop client (Windows, Linux, macOS)
-
-```sh
-cargo run --locked --package grootscape-desktop
-```
-
-The log names the GPU and backend. `--exit-after-frames <count>` closes the window after that many frames, for smoke tests.
-
-### Browser client
-
-```sh
-cargo build --locked --release --package grootscape-web --target wasm32-unknown-unknown
-wasm-bindgen --target web --no-typescript --out-dir apps/web/pkg target/wasm32-unknown-unknown/release/grootscape_web.wasm
-python3 -m http.server 8765 --directory apps/web
-```
-
-Open <http://localhost:8765>. The status line shows the engine version and whether the browser uses WebGPU or WebGL.
-
-### macOS app
-
-```sh
-cargo build --locked --release --package grootscape-native
-swift run --package-path apps/macos GrootscapeMac
-```
-
-Open `apps/macos/Package.swift` in Xcode to work on the app after building the engine.
-
-### Android app
-
-Open `apps/android` in Android Studio and run the `app` configuration, or build from the command line:
-
-```sh
-cd apps/android && ./gradlew assembleDebug
-```
-
-Gradle builds the engine for each ABI with `cargo-ndk` before packaging. With a device or emulator attached, `./gradlew connectedDebugAndroidTest` runs the instrumented tests that load the engine through JNI.
 
 ## Verify a change
 
 ```sh
-cargo fmt --all --check
-cargo clippy --workspace --all-targets --locked -- -D warnings
-cargo test --workspace --locked
+cmake --preset dev
+cmake --build --preset dev
+ctest --preset dev
+find src/client tests/client -type f \( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' \) -print0 | xargs -0 clang-format --dry-run --Werror
+cmake --preset tidy
+cmake --build --preset tidy
+cmake --preset asan
+cmake --build --preset asan
+ctest --preset asan
+cmake --preset tsan
+cmake --build --preset tsan
+ctest --preset tsan
 
 dotnet restore Grootscape.slnx --locked-mode
 dotnet format Grootscape.slnx --verify-no-changes --no-restore
 dotnet build Grootscape.slnx --configuration Release --no-restore
 dotnet test --solution Grootscape.slnx --configuration Release --no-build
+python3 tools/test-server-integration.py build/dev/protocol-peer
 ```
 
-GitHub Actions also runs the Rust and .NET checks on Linux, macOS, and Windows, opens the desktop window on all three (software rendering where the runner has no GPU), checks the Swift app, builds the browser client, builds the Android APK and runs its instrumented tests on an emulator, and probes the server container. Commit the affected lockfile with any dependency change. See [AGENTS.md](AGENTS.md) for the contribution rules and [SECURITY.md](SECURITY.md) to report a vulnerability.
+Use clang-format 22.1.8 and clang-tidy 18 or later. Put clang-tidy on PATH before configuring `tidy`. Sanitizer presets require Clang or GCC; use separate build directories because TSan cannot run with ASan. Tests include canonical protocol fixtures, invalid command inputs, C ABI version, renderer pixel readback, resize and repeated destruction, plus a C++/.NET WebSocket handshake through `/play`. Linux display tests need Xvfb or a desktop session. CI exercises all three desktop systems, the server container, Android and the browser.
+
+### Swift macOS host
+
+```sh
+cmake --preset release
+cmake --build --preset release
+swift run --package-path apps/macos GrootscapeMac --version
+swift run --package-path apps/macos GrootscapeMac
+```
+
+### Android host
+
+Install JDK 17 and Android SDK 36. Gradle pins NDK 29.0.14206865 and CMake 3.31.6 and builds both arm64-v8a and x86_64 libraries. Set ANDROID_HOME or use an untracked `apps/android/local.properties` with `sdk.dir`.
+
+```sh
+cd apps/android
+./gradlew assembleDebug assembleDebugAndroidTest --console=plain
+./gradlew connectedDebugAndroidTest --console=plain
+```
+
+The second command needs a device or emulator. These hosts retain the current version display; rendering into Android SurfaceView remains #43.
+
+### Browser host
+
+Use [Emscripten SDK](https://github.com/emscripten-core/emsdk) commit `e4fe26ef59168ff44f4c23c466e497bf60b3411e`, install and activate `4.0.20`, then source `emsdk_env.sh`.
+
+```sh
+emcmake cmake -S . -B build/web -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+cmake --build build/web
+cd tests/web
+npm ci
+npx playwright install chromium
+npm test
+```
+
+Serve `apps/web` with a static HTTP server. Generated files go into `apps/web/pkg`. WebGL 2 is required. The page waits for a visible, nonzero canvas and pauses rendering when hidden. Browser tests check hidden startup, resize and clear pixels. No WebGPU-only path remains. See the [backend decision](docs/decisions/0001-cpp23-client.md) and [migration evidence](docs/verification/cpp23-migration.md).
+
+See [architecture](docs/architecture.md), [contribution rules](AGENTS.md), and [security reporting](SECURITY.md).

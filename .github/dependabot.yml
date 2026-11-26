@@ -14,13 +14,10 @@ updates:
     groups:
       opentelemetry:
         patterns: ["OpenTelemetry*"]
-  - package-ecosystem: cargo
-    directory: /
+  - package-ecosystem: npm
+    directory: /tests/web
     schedule:
       interval: weekly
-    groups:
-      wasm-bindgen:
-        patterns: ["wasm-bindgen*", "web-sys", "js-sys"]
   - package-ecosystem: gradle
     directory: /apps/android
     schedule:

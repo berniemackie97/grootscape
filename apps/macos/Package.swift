@@ -7,9 +7,8 @@ let repo = URL(fileURLWithPath: #filePath)
     .deletingLastPathComponent()
     .deletingLastPathComponent()
 
-// Built by `cargo build --locked --release --package grootscape-native`. The archive is linked by
-// path so the linker does not pick the shared library that the same build produces for Android.
-let engineArchive = repo.appending(path: "target/release/libgrootscape_native.a").path
+// Built by `cmake --build --preset release`. Link the archive directly.
+let engineArchive = repo.appending(path: "build/release/libgrootscape_native.a").path
 
 let package = Package(
     name: "GrootscapeMac",
