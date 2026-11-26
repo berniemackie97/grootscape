@@ -9,7 +9,7 @@ The foundation runs end to end: the server ticks the world, accepts WebSocket cl
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0), `10.0.403` or later. CI uses `10.0.404`.
 - [Rustup](https://rustup.rs/). `rust-toolchain.toml` pins Rust, rustfmt, and Clippy.
 - For the browser client: `rustup target add wasm32-unknown-unknown` and `cargo install wasm-bindgen-cli --version 0.2.130 --locked`.
-- For the Android app: Android Studio or the Android SDK with an NDK, JDK 17, `rustup target add aarch64-linux-android x86_64-linux-android`, and `cargo install cargo-ndk --version 4.1.2 --locked`.
+- For the Android app: Android Studio or the Android SDK, JDK 17, `rustup target add aarch64-linux-android x86_64-linux-android`, and `cargo install cargo-ndk --version 4.1.2 --locked`. Gradle installs the pinned NDK.
 - For the macOS app: Xcode or the Command Line Tools.
 - For the server image: Docker.
 
@@ -64,7 +64,7 @@ Open `apps/android` in Android Studio and run the `app` configuration, or build 
 cd apps/android && ./gradlew assembleDebug
 ```
 
-Gradle builds the engine for each ABI with `cargo-ndk` before packaging.
+Gradle builds the engine for each ABI with `cargo-ndk` before packaging. With a device or emulator attached, `./gradlew connectedDebugAndroidTest` runs the instrumented tests that load the engine through JNI.
 
 ## Verify a change
 
@@ -79,4 +79,4 @@ dotnet build Grootscape.slnx --configuration Release --no-restore
 dotnet test --solution Grootscape.slnx --configuration Release --no-build
 ```
 
-GitHub Actions also runs the Rust and .NET checks on Linux, macOS, and Windows, smoke-tests the desktop window and the Swift app on macOS, builds the browser client and the Android APK, and probes the server container. Commit the affected lockfile with any dependency change. See [AGENTS.md](AGENTS.md) for the contribution rules and [SECURITY.md](SECURITY.md) to report a vulnerability.
+GitHub Actions also runs the Rust and .NET checks on Linux, macOS, and Windows, opens the desktop window on all three (software rendering where the runner has no GPU), checks the Swift app, builds the browser client, builds the Android APK and runs its instrumented tests on an emulator, and probes the server container. Commit the affected lockfile with any dependency change. See [AGENTS.md](AGENTS.md) for the contribution rules and [SECURITY.md](SECURITY.md) to report a vulnerability.

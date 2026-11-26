@@ -92,13 +92,7 @@ impl Renderer {
         let surface = instance
             .create_surface(target)
             .map_err(RendererError::CreateSurface)?;
-        let adapter = instance
-            .request_adapter(&wgpu::RequestAdapterOptions {
-                compatible_surface: Some(&surface),
-                ..Default::default()
-            })
-            .await
-            .map_err(RendererError::RequestAdapter)?;
+        let adapter = request_adapter(&instance, &surface).await?;
         let (device, queue) = adapter
             .request_device(&wgpu::DeviceDescriptor {
                 label: Some("grootscape"),
@@ -177,6 +171,26 @@ impl Renderer {
         self.queue.submit([encoder.finish()]);
         self.queue.present(texture);
         Ok(Frame::Presented)
+    }
+}
+
+/// Prefers a hardware adapter and falls back to a software one, such as WARP or lavapipe, on
+/// machines without a usable GPU driver (virtual machines, remote desktops, CI runners).
+async fn request_adapter(
+    instance: &wgpu::Instance,
+    surface: &wgpu::Surface<'_>,
+) -> Result<wgpu::Adapter, RendererError> {
+    let options = |force_fallback_adapter| wgpu::RequestAdapterOptions {
+        compatible_surface: Some(surface),
+        force_fallback_adapter,
+        ..Default::default()
+    };
+    match instance.request_adapter(&options(false)).await {
+        Ok(adapter) => Ok(adapter),
+        Err(hardware_error) => instance
+            .request_adapter(&options(true))
+            .await
+            .map_err(|_| RendererError::RequestAdapter(hardware_error)),
     }
 }
 
