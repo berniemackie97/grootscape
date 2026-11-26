@@ -8,7 +8,7 @@ Main `d663f58d31d730c5c19b979e84b5725448745952` contains a clear-screen renderer
 
 ## Decision
 
-Use C++23 with CMake/Ninja and SDL3 3.4.8 at commit `d9d5536704d585616d4db3c8ba3c4ff6fc2757e1`. Verify the source archive SHA-256 in CMake. SDL uses the zlib license; its source distribution retains its license. No third-party product data enters this migration.
+Use C++23 with CMake/Ninja and SDL3 3.4.20 at commit `f00dc919ca35b9756316e86c4777392de442f9b2`. Verify the source archive SHA-256 in CMake. SDL uses the zlib license; its source distribution retains its license. No third-party product data enters this migration.
 
 Use SDL's renderer for the current clear-screen contract. Native selection can use Metal, Direct3D, OpenGL or software according to platform availability. Emscripten uses OpenGL ES translated to WebGL 2, with minimum and maximum WebGL versions set to 2. Hardware selection remains SDL's responsibility; software rendering is available and tested explicitly. Report the renderer name at startup.
 

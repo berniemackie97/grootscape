@@ -23,7 +23,7 @@ Rust baseline tests passed in a detached worktree at the audited main commit. Al
 
 Local validation passed on Apple Silicon macOS: 3 native CTest entries, 3 browser tests (including context loss and reload), the Metal three-frame smoke, Swift version linkage, both Android debug/test APK ABI builds, clang-tidy 22.1.8, ASan/UBSan, TSan, all 39 .NET tests, and live C++/.NET protocol integration. Native release artifacts also built and tested with an explicit macOS 14 deployment target. CI uses a reduced mmap randomization setting for the Linux TSan runtime; this changes the test runner, not product behavior.
 
-PR #167 records the final head and its CI result after removal. Main remains unchanged pending owner approval. Roadmap #166 stays In Review; no acceptance or gameplay issue is closed before merge.
+The final dependency review pins SDL 3.4.20, the current stable patch release at review time; final checks cover this pin. PR #167 records the final head and its CI result after removal. Main remains unchanged pending owner approval. Roadmap #166 stays In Review; no acceptance or gameplay issue is closed before merge.
 
 ## Limits
 
