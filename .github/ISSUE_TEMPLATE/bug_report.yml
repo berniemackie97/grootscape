@@ -1,0 +1,94 @@
+name: Bug report
+description: Report a defect in the server, a client, tooling, or the build.
+title: "[Bug]: "
+labels: ["type: bug", "status: triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report one defect per issue and search existing issues first. Report security vulnerabilities through a [private advisory](https://github.com/berniemackie97/grootscape/security/advisories/new), not here.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Server (world, network, persistence)
+        - Wire protocol
+        - Engine / renderer
+        - Desktop client (Windows, Linux, macOS)
+        - Browser client
+        - macOS app
+        - Android app
+        - Content or cache
+        - Build, CI, or tooling
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: Impact on players or development, independent of how hard the fix is.
+      options:
+        - "S1 Critical: crash, data loss, security exposure, or world unavailable"
+        - "S2 Major: core feature broken with no workaround"
+        - "S3 Moderate: feature impaired, workaround exists"
+        - "S4 Minor: cosmetic or low impact"
+    validations:
+      required: true
+  - type: input
+    id: build
+    attributes:
+      label: Build
+      description: Commit SHA, tag, or CI run that shows the defect.
+      placeholder: 6c2a8ab
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system and version, device or GPU, browser and version, and the renderer backend the client logs at startup.
+      placeholder: |
+        macOS 26.1, Apple M4, Metal
+        Chrome 140, BrowserWebGpu
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The smallest sequence that reproduces the defect from a clean start.
+      placeholder: |
+        1. Start the server with default settings.
+        2. Connect the desktop client.
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: Reproduction rate
+      options:
+        - Always
+        - Intermittent
+        - Once
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs and evidence
+      description: Server or client logs, stack traces, screenshots, or captures. Remove credentials and personal data.
+      render: text

@@ -1,0 +1,4 @@
+module GrootscapeNative [system] {
+    header "../../../../src/client/grootscape-native/include/grootscape.h"
+    export *
+}

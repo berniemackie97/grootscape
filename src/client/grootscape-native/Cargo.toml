@@ -1,0 +1,19 @@
+[package]
+name = "grootscape-native"
+description = "C and JNI interfaces to the Grootscape engine for the Apple and Android hosts."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+crate-type = ["rlib", "staticlib", "cdylib"]
+
+[dependencies]
+grootscape-engine.workspace = true
+
+[target.'cfg(target_os = "android")'.dependencies]
+jni.workspace = true
+
+[lints]
+workspace = true

@@ -1,9 +1,0 @@
-[package]
-name = "grootscape-engine"
-version.workspace = true
-edition.workspace = true
-rust-version.workspace = true
-publish = false
-
-[lib]
-crate-type = ["rlib", "staticlib"]

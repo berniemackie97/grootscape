@@ -1,0 +1,72 @@
+{
+  "protocolVersion": 1,
+  "messages": [
+    {
+      "name": "client-hello-windows",
+      "direction": "clientToServer",
+      "hex": "01000101",
+      "message": { "type": "clientHello", "protocolVersion": 1, "platform": "windows" }
+    },
+    {
+      "name": "client-hello-linux",
+      "direction": "clientToServer",
+      "hex": "01000102",
+      "message": { "type": "clientHello", "protocolVersion": 1, "platform": "linux" }
+    },
+    {
+      "name": "client-hello-macos",
+      "direction": "clientToServer",
+      "hex": "01000103",
+      "message": { "type": "clientHello", "protocolVersion": 1, "platform": "macos" }
+    },
+    {
+      "name": "client-hello-android",
+      "direction": "clientToServer",
+      "hex": "01000104",
+      "message": { "type": "clientHello", "protocolVersion": 1, "platform": "android" }
+    },
+    {
+      "name": "client-hello-web",
+      "direction": "clientToServer",
+      "hex": "01000105",
+      "message": { "type": "clientHello", "protocolVersion": 1, "platform": "web" }
+    },
+    {
+      "name": "server-welcome-600ms",
+      "direction": "serverToClient",
+      "hex": "0200010258",
+      "message": { "type": "serverWelcome", "protocolVersion": 1, "tickDurationMs": 600 }
+    },
+    {
+      "name": "server-reject-unsupported-version",
+      "direction": "serverToClient",
+      "hex": "0301",
+      "message": { "type": "serverReject", "reason": "unsupportedVersion" }
+    },
+    {
+      "name": "server-reject-malformed",
+      "direction": "serverToClient",
+      "hex": "0302",
+      "message": { "type": "serverReject", "reason": "malformed" }
+    }
+  ],
+  "invalid": [
+    { "name": "client-empty", "direction": "clientToServer", "hex": "", "error": "empty" },
+    { "name": "client-unknown-opcode", "direction": "clientToServer", "hex": "7f", "error": "unknownOpcode" },
+    { "name": "client-server-opcode", "direction": "clientToServer", "hex": "0200010258", "error": "unknownOpcode" },
+    { "name": "client-hello-missing-version", "direction": "clientToServer", "hex": "0100", "error": "truncated" },
+    { "name": "client-hello-missing-platform", "direction": "clientToServer", "hex": "010001", "error": "truncated" },
+    { "name": "client-hello-trailing-byte", "direction": "clientToServer", "hex": "0100010500", "error": "trailingBytes" },
+    { "name": "client-hello-unknown-platform", "direction": "clientToServer", "hex": "01000106", "error": "invalidValue" },
+    { "name": "client-hello-platform-zero", "direction": "clientToServer", "hex": "01000100", "error": "invalidValue" },
+    { "name": "client-hello-future-version", "direction": "clientToServer", "hex": "0100020500ff", "error": "unsupportedVersion" },
+    { "name": "client-hello-version-zero", "direction": "clientToServer", "hex": "01000005", "error": "unsupportedVersion" },
+    { "name": "server-empty", "direction": "serverToClient", "hex": "", "error": "empty" },
+    { "name": "server-client-opcode", "direction": "serverToClient", "hex": "01000105", "error": "unknownOpcode" },
+    { "name": "server-welcome-truncated", "direction": "serverToClient", "hex": "02000102", "error": "truncated" },
+    { "name": "server-welcome-trailing-byte", "direction": "serverToClient", "hex": "020001025800", "error": "trailingBytes" },
+    { "name": "server-welcome-future-version", "direction": "serverToClient", "hex": "0200020258", "error": "unsupportedVersion" },
+    { "name": "server-reject-truncated", "direction": "serverToClient", "hex": "03", "error": "truncated" },
+    { "name": "server-reject-unknown-reason", "direction": "serverToClient", "hex": "0309", "error": "invalidValue" }
+  ]
+}

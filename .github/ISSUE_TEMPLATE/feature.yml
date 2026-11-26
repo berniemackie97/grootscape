@@ -1,0 +1,55 @@
+name: Feature
+description: Propose a player-facing or developer-facing capability.
+title: "[Feature]: "
+labels: ["type: feature", "status: triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the outcome, not the implementation. Accepted features are split into engineering tasks that each ship on their own.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Who is affected, what they cannot do today, and why it matters.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: What is true once this ships, as players or developers experience it.
+    validations:
+      required: true
+  - type: checkboxes
+    id: targets
+    attributes:
+      label: Affected targets
+      options:
+        - label: Server
+        - label: Windows
+        - label: Linux
+        - label: macOS
+        - label: Browser
+        - label: Android
+        - label: iOS
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Observable, testable conditions. Each one becomes a verification step.
+      placeholder: |
+        - [ ] A player on any client sees ...
+        - [ ] The server rejects ...
+    validations:
+      required: true
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: Related work this feature deliberately excludes.
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: TSPS revision and file paths, design documents, captures, or related issues.

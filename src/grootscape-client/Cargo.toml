@@ -1,9 +1,0 @@
-[package]
-name = "grootscape-client"
-version.workspace = true
-edition.workspace = true
-rust-version.workspace = true
-publish = false
-
-[dependencies]
-grootscape-engine = { path = "../grootscape-engine" }
