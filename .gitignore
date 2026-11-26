@@ -2,7 +2,6 @@ bin/
 obj/
 artifacts/
 TestResults/
-target/
 .build/
 .swiftpm/
 .vs/
@@ -12,3 +11,15 @@ target/
 *.suo
 .env
 .env.*
+
+build/
+CMakeUserPresets.json
+node_modules/
+test-results/
+playwright-report/
+
+.cxx/
+# Also ignore links to build caches on external storage.
+build
+.build
+.cxx

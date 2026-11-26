@@ -1,6 +1,6 @@
 package dev.grootscape
 
-/** JNI bindings to the Rust engine, implemented by the grootscape-native crate. */
+/** JNI bindings to the C++ engine, implemented by grootscape_native. */
 object Engine {
     init {
         System.loadLibrary("grootscape_native")

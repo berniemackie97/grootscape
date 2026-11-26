@@ -1,61 +1,36 @@
-plugins {
-    alias(libs.plugins.android.application)
-}
-
-val minSdkVersion = 28
-val engineNdkVersion = "29.0.14206865"
-val rustAbis = listOf("arm64-v8a", "x86_64")
+plugins { alias(libs.plugins.android.application) }
 val repositoryRoot = rootProject.layout.projectDirectory.dir("../..")
-val rustJniLibs = layout.buildDirectory.dir("rustJniLibs")
-
-// The Cargo workspace version is the single source of the client version on every platform.
-val engineVersion = providers.fileContents(repositoryRoot.file("Cargo.toml")).asText.map { manifest ->
-    Regex("""(?m)^version = "([^"]+)"""").find(manifest)?.groupValues?.get(1)
-        ?: error("Cargo.toml has no workspace version")
-}
-
+val engineVersion = providers.fileContents(repositoryRoot.file("VERSION")).asText.map { it.trim() }
 android {
     namespace = "dev.grootscape"
     compileSdk = 36
-    // AGP installs this NDK when it is missing; cargo-ndk links the engine with it.
-    ndkVersion = engineNdkVersion
-
+    ndkVersion = "29.0.14206865"
     defaultConfig {
         applicationId = "dev.grootscape"
-        minSdk = minSdkVersion
+        minSdk = 28
         targetSdk = 36
         versionCode = 1
         versionName = engineVersion.get()
-        ndk { abiFilters += rustAbis }
+        ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                arguments += listOf("-DGROOTSCAPE_RENDERER=OFF", "-DBUILD_TESTING=OFF")
+                targets += "grootscape_native"
+            }
+        }
     }
-
+    externalNativeBuild {
+        cmake {
+            path = repositoryRoot.file("CMakeLists.txt").asFile
+            version = "3.31.6"
+        }
+    }
     buildFeatures { buildConfig = true }
-
-    sourceSets.getByName("main").jniLibs.directories.add(rustJniLibs.get().asFile.path)
 }
-
-kotlin {
-    jvmToolchain(17)
-}
-
+kotlin { jvmToolchain(17) }
 dependencies {
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.junit)
 }
-
-val buildRustLibraries = tasks.register<CargoNdkBuild>("buildRustLibraries") {
-    description = "Builds libgrootscape_native.so for each Android ABI."
-    workspaceDirectory = repositoryRoot
-    sources = repositoryRoot.dir("src/client")
-    lockfile = repositoryRoot.file("Cargo.lock")
-    ndkDirectory = androidComponents.sdkComponents.ndkDirectory
-    ndkVersion = engineNdkVersion
-    packageName = "grootscape-native"
-    abis = rustAbis
-    platform = minSdkVersion
-    outputDirectory = rustJniLibs
-}
-
-tasks.named("preBuild") { dependsOn(buildRustLibraries) }

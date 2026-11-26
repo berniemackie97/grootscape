@@ -1,6 +1,6 @@
 # Wire protocol
 
-This directory is the single source of truth for the Grootscape client/server wire contract. The Rust codec (`src/client/grootscape-protocol`) and the C# codec (`src/server/Grootscape.Protocol`) both verify themselves against [`fixtures/v1.json`](fixtures/v1.json). Change the specification, the fixtures, and both codecs in the same change.
+This directory is the single source of truth for the Grootscape client/server wire contract. The C++23 codec (`src/client/cpp/protocol.cpp`) and the C# codec (`src/server/Grootscape.Protocol`) both verify themselves against [`fixtures/v1.json`](fixtures/v1.json). Change the specification, the fixtures, and both codecs in the same change.
 
 ## Transport
 
