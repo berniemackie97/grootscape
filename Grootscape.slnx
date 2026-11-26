@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Grootscape.Server/Grootscape.Server.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Grootscape.Server.Tests/Grootscape.Server.Tests.csproj" />
+  </Folder>
+</Solution>
