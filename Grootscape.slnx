@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/Client/">
+    <File Path="Cargo.toml" />
+    <File Path="apps/macos/Package.swift" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Grootscape.Server/Grootscape.Server.csproj" />
   </Folder>

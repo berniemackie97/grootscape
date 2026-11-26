@@ -3,6 +3,8 @@ obj/
 artifacts/
 TestResults/
 target/
+.build/
+.swiftpm/
 .vs/
 .idea/
 .DS_Store

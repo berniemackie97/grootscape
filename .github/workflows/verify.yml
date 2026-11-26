@@ -46,3 +46,9 @@ jobs:
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
       - run: cargo test --workspace --locked
       - run: cargo run --locked --package grootscape-client -- --version
+      - if: runner.os == 'macOS'
+        run: |
+          cargo build --locked --release --target-dir target --package grootscape-engine
+          desktop_version="$(cargo run --quiet --locked --package grootscape-client -- --version)"
+          mac_version="$(swift run --quiet --package-path apps/macos GrootscapeMac --version)"
+          test "$desktop_version" = "grootscape-client $mac_version"

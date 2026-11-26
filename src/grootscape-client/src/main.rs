@@ -9,7 +9,7 @@ fn main() -> ExitCode {
 
     match (args.next().as_deref(), args.next()) {
         (Some(arg), None) if arg == OsStr::new("--version") => {
-            println!("grootscape-client {}", env!("CARGO_PKG_VERSION"));
+            println!("grootscape-client {}", grootscape_engine::VERSION);
             ExitCode::SUCCESS
         }
         (arg, None) if arg.is_none() || arg == Some(OsStr::new("--help")) => {
