@@ -2,6 +2,8 @@ using System.Buffers.Binary;
 
 namespace Grootscape.Protocol;
 
+
+
 /// <summary>The first message a client sends.</summary>
 public readonly record struct ClientHello(Platform Platform)
 {
