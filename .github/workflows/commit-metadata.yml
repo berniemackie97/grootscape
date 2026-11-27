@@ -1,0 +1,59 @@
+name: Commit metadata
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, edited]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Commit metadata
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate metadata
+        env:
+          METADATA_PATTERN: ${{ vars.COMMIT_METADATA_PATTERN }}
+        run: |
+          python3 <<'PY'
+          import json
+          import os
+          import re
+          import subprocess
+
+          pattern = os.environ["METADATA_PATTERN"]
+
+          if not pattern:
+              raise SystemExit("Metadata policy is not configured.")
+
+          policy = re.compile(pattern)
+          history = subprocess.check_output(
+              ["git", "log", "--format=%B", "HEAD"],
+              text=True
+          )
+
+          if policy.search(history):
+              raise SystemExit("Commit metadata violates repository policy.")
+
+          with open(os.environ["GITHUB_EVENT_PATH"]) as file:
+              event = json.load(file)
+
+          pr = event.get("pull_request")
+
+          if pr:
+              metadata = (pr.get("title") or "") + "\n" + (pr.get("body") or "")
+
+              if policy.search(metadata):
+                  raise SystemExit("Pull request metadata violates repository policy.")
+
+          print("Metadata validation passed.")
+          PY
