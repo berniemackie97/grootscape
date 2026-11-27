@@ -7,6 +7,4 @@ extern "C" JNIEXPORT jstring JNICALL Java_dev_grootscape_Engine_version(JNIEnv *
 }
 #endif
 
-const char *grootscape_engine_version() {
-    return GROOTSCAPE_VERSION;
-}
+const char *grootscape_engine_version() { return GROOTSCAPE_VERSION; }

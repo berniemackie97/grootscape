@@ -32,7 +32,5 @@ bool Renderer::render() {
     return true;
 }
 
-const char *Renderer::backend() const noexcept {
-    return SDL_GetRendererName(renderer_.get());
-}
+const char *Renderer::backend() const noexcept { return SDL_GetRendererName(renderer_.get()); }
 } // namespace grootscape
