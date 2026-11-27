@@ -2,17 +2,13 @@ using Microsoft.Extensions.Options;
 
 namespace Grootscape.Server.Network;
 
-/// <summary>The WebSocket endpoint that every client connects to. See <c>protocol/README.md</c>.</summary>
 internal static class PlayEndpoint
 {
     public const string Path = "/play";
 
     public static IServiceCollection AddNetwork(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddOptions<NetworkOptions>()
-            .Bind(configuration.GetSection(NetworkOptions.SectionName))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+        services.AddOptions<NetworkOptions>().Bind(configuration.GetSection(NetworkOptions.SectionName)).ValidateDataAnnotations().ValidateOnStart();
         services.AddSingleton<PlaySessionHandler>();
         return services;
     }
