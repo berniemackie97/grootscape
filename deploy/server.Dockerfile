@@ -2,7 +2,7 @@
 # Builds the Grootscape world server. Run from the repository root:
 #   docker build -f deploy/server.Dockerfile -t grootscape-server .
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:11.0 AS build
 WORKDIR /src
 COPY global.json Directory.Build.props Directory.Packages.props .editorconfig ./
 COPY src/server/ src/server/
