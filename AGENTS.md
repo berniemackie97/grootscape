@@ -7,5 +7,6 @@
 - Treat `protocol/` as the wire contract. Change the specification, the fixtures, and both codecs together.
 - Keep game rules independent of transport, graphics, and persistence. Establish those boundaries when the first behavior crosses them. Give mutable world state one owner and document ordering at each boundary.
 - Pin behavior and compatibility to a named upstream revision and reproducible evidence when a slice depends on TSPS. Preserve component license notices and record provenance before importing third-party code or data. Use original or appropriately licensed assets in the repository and verification fixtures.
+- For behavior or content changes, follow [the research workflow](docs/research.md): inspect revision-appropriate evidence before implementation, cross-check claims, and record sources and unresolved discrepancies. Prefer local research indexes when available; missing results do not establish missing game behavior.
 - Cover changes to externally visible behavior with a focused regression check. Measure performance claims against a repeatable workload and keep the measurement alongside its results.
 - Run the verification commands in the README before handing off a change. Report the checks run and any external validation still required.
