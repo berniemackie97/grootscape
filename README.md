@@ -82,4 +82,4 @@ npm test
 
 Serve `apps/web` with a static HTTP server. Generated files go into `apps/web/pkg`. WebGL 2 is required. The page waits for a visible, nonzero canvas and pauses rendering when hidden. Browser tests check hidden startup, resize and clear pixels. No WebGPU-only path remains. See the [backend decision](docs/decisions/0001-cpp23-client.md) and [migration evidence](docs/verification/cpp23-migration.md).
 
-See [architecture](docs/architecture.md), [contribution rules](AGENTS.md), and [security reporting](SECURITY.md).
+See [architecture](docs/architecture.md), [contribution rules](AGENTS.md), [offline research](docs/research.md), and [security reporting](SECURITY.md).
