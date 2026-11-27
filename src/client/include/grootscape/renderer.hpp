@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL3/SDL.h>
 #include <memory>
+
 namespace grootscape {
 // The host owns the window. Destroy the renderer before the window, on the host thread.
 class Renderer final {
