@@ -8,12 +8,7 @@
 
 namespace grootscape {
 struct Options {
-    enum class Command : std::uint8_t {
-        run,
-        version,
-        help
-    }
-    command = Command::run;
+    enum class Command : std::uint8_t { run, version, help } command = Command::run;
     std::uint32_t frame_limit = 0;
 };
 inline Options parse_options(std::span<const std::string_view> args) {
@@ -28,7 +23,8 @@ inline Options parse_options(std::span<const std::string_view> args) {
     }
     if (args.size() == 2 && args[0] == "--exit-after-frames") {
         std::uint32_t count = 0;
-        if (const auto [end, error] = std::from_chars(args[1].data(), args[1].data() + args[1].size(), count);
+        if (const auto [end, error] =
+                std::from_chars(args[1].data(), args[1].data() + args[1].size(), count);
             error == std::errc{} && end == args[1].data() + args[1].size() && count > 0) {
             return {Options::Command::run, count};
         }
