@@ -8,10 +8,7 @@ internal static class WorldServiceCollectionExtensions
 {
     public static IServiceCollection AddWorld(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddOptions<WorldOptions>()
-            .Bind(configuration.GetSection(WorldOptions.SectionName))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+        services.AddOptions<WorldOptions>().Bind(configuration.GetSection(WorldOptions.SectionName)).ValidateDataAnnotations().ValidateOnStart();
         services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton<GameWorld>();
         services.AddSingleton<WorldLoop>();

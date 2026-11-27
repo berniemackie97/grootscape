@@ -10,16 +10,11 @@ internal static class ObservabilityExtensions
 {
     private const string ServiceName = "grootscape-server";
 
-    /// <summary>
-    /// Configures logs, metrics, and traces. Telemetry is exported over OTLP when the standard
-    /// <c>OTEL_EXPORTER_OTLP_ENDPOINT</c> setting is present, and stays in process otherwise.
-    /// </summary>
     public static WebApplicationBuilder AddObservability(this WebApplicationBuilder builder)
     {
         builder.Services.AddSingleton<ServerMetrics>();
 
-        string version = typeof(ObservabilityExtensions).Assembly
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown";
+        string version = typeof(ObservabilityExtensions).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown";
 
         OpenTelemetryBuilder telemetry = builder.Services.AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService(ServiceName, serviceVersion: version))

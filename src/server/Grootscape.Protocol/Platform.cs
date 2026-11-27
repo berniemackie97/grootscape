@@ -1,6 +1,5 @@
 namespace Grootscape.Protocol;
 
-/// <summary>The platform a client runs on.</summary>
 public enum Platform : byte
 {
     Windows = 1,

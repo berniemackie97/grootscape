@@ -2,13 +2,13 @@ using System.Buffers.Binary;
 
 namespace Grootscape.Protocol;
 
+
+
 /// <summary>The first message a client sends.</summary>
 public readonly record struct ClientHello(Platform Platform)
 {
     private const int Length = 4;
 
-    /// <summary>Decodes one WebSocket binary message as a hello.</summary>
-    /// <remarks>The version is checked before the rest of the message, as the specification requires.</remarks>
     public static bool TryDecode(ReadOnlySpan<byte> message, out ClientHello hello, out DecodeError error)
     {
         hello = default;
@@ -44,16 +44,11 @@ public readonly record struct ClientHello(Platform Platform)
             return DecodeError.UnsupportedVersion;
         }
 
-        if (message.Length < Length)
+        return message.Length switch
         {
-            return DecodeError.Truncated;
-        }
-
-        if (message.Length > Length)
-        {
-            return DecodeError.TrailingBytes;
-        }
-
-        return Enum.IsDefined((Platform)message[3]) ? DecodeError.None : DecodeError.InvalidValue;
+            < Length => DecodeError.Truncated,
+            > Length => DecodeError.TrailingBytes,
+            _ => Enum.IsDefined((Platform)message[3]) ? DecodeError.None : DecodeError.InvalidValue
+        };
     }
 }
