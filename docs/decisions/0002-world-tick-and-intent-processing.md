@@ -18,7 +18,7 @@ Use a synchronized `Queue<T>` with `Lock` for each session. Use a common admissi
 
 Apply session lifecycle notifications captured at the cutoff in their admission order. World-owned NPC lifecycle changes follow the world phase order. Sessions that join at the cutoff can take a turn, but their gameplay input is eligible only after world admission. For M1, discard pending input and remove the player at the first cutoff that observes a disconnect; the grace period is zero ticks. A disconnect after the cutoff takes effect at the next cutoff, not during a player's turn. Prevent further admissions for closed sessions. Do not reuse a session identity for a new connection. TSPS can execute already queued input for a disconnected player held in combat; this decision deliberately retains the discard requirement in #27 for M1. Review combat retention and its input policy in #105 and #116 before implementing that behavior.
 
-Use 240 pending intents per session as the initial configurable limit, based on the TSPS reference. Validate the limit at startup. On overflow, reject the new intent, stop admission for that session, record the reason and schedule close status 1008 outside the tick. Do not silently overwrite or drop accepted input to make space. The disconnect rule determines when pending input is discarded. A full queue must not prevent admission to another session. Bound the number of intents eligible for each turn by the queue limit. Review limits with load evidence; the prototype does not establish a production limit.
+Use 240 pending intents per session as the initial configurable limit, based on the TSPS reference. Validate the limit at startup. On overflow, reject the new intent, stop admission for that session, record the reason and schedule termination with best-effort close status 1008 outside the tick. Do not silently overwrite or drop accepted input to make space. The disconnect rule determines when pending input is discarded. A full session queue must not prevent admission to another session while the world admission budget has space. Set a finite configurable limit on registered and pending world sessions (including closed sessions not yet removed), a finite aggregate count of retained intents, and a finite bound on decoded intent payload size. Validate these limits and their combined memory budget at startup. Reserve and release the aggregate count under the admission gate, including captured intents until consumed or discarded; do not permit a session to escape accounting by disconnecting. Reject new world admissions when the session budget is full. If the aggregate intent budget is exhausted, reject the new intent, stop admission for its session and record a distinct overload reason. Reserve bounded lifecycle storage for admitted sessions so disconnects cannot be starved by gameplay input. #27 must establish and document the initial aggregate limits before enabling gameplay intake; #50 must verify the memory and load budget. Bound the number of intents eligible for each turn by the queue limit. Review limits with load evidence; the prototype does not establish a production limit.
 
 ### Tick phases
 
@@ -29,7 +29,7 @@ Use 240 pending intents per session as the initial configurable limit, based on 
 5. Determine player priority and complete each eligible player turn in that order. Within a turn, validate and apply the captured FIFO input, apply due combat hits and timers, process pre-movement combat, pursuit and movement, post-movement combat, walk-to interactions and remaining player mechanics.
 6. Process remaining world interactions and hits, then rebuild visibility data.
 7. Build authoritative updates from the resulting state and submit them to outbound queues.
-8. Reset transient update flags and release identifiers only after all observers have their updates.
+8. Reset transient update flags and release identifiers only after all eligible observers have had their publication attempt.
 
 Implement only the phases with actual behavior in each story. Do not create empty subsystems for future mechanics. Gameplay input admitted after the cutoff of tick N is eligible at the cutoff of tick N+1, not partway through another player's turn. This differs from the per-player input cutoff in TSPS and preserves the fairness requirement in #27.
 
@@ -43,7 +43,7 @@ Use a controlled source of random decisions. Record the initial state, tick numb
 
 Use monotonic elapsed time from the injected `TimeProvider`. Wait until the first deadline (one tick interval after start). Anchor the next deadline to the actual first tick start plus one interval. On subsequent ticks, advance the previous deadline by one interval. If the actual start is strictly more than one interval after that advanced deadline, set the next deadline to actual start plus one interval. Otherwise retain the advanced deadline. Wait only for a positive remaining duration; if overdue, start the next tick without an additional delay. Check cancellation before each tick. Execute one complete tick at a time; do not increment the tick counter for an unexecuted tick. Record execution duration, overrun and start lateness. The default remains 600 ms.
 
-The world loop builds updates after simulation. A bounded per-session outbound queue transfers immutable updates to a send loop outside simulation. Publication never awaits socket or disk I/O. If an outbound update cannot be admitted, do not silently drop ordered state or wait for space; mark the session unable to receive a complete stream, stop further admissions and initiate disconnect with status 1008 outside the tick. A stalled send also has a configured timeout; close with status 1008 on expiry. Record both reasons. Issue #33 defines and verifies the slow-consumer policy. Reset shared update flags only after all eligible observers have had their publication attempt. Do not release identifiers prematurely.
+The world loop builds updates after simulation. A bounded per-session outbound queue transfers immutable updates to a send loop outside simulation. Publication never awaits socket or disk I/O. If an outbound update cannot be admitted, do not silently drop ordered state or wait for space; mark the session unable to receive a complete stream, stop further admissions and request termination outside the tick. Use one owner for all socket sends, including close frames. On overflow, attempt a close frame with status 1008 only after any in-flight send completes within its configured deadline. Bound the close attempt by the configured close timeout; abort the socket on expiry or failure. On a send timeout, abort the socket and observe the pending send result without starting another send or close operation. Do not await the stalled operation on the world loop. Record the overflow or timeout reason and schedule removal exactly once. A close frame is best effort, not a guarantee that the peer receives status 1008. The same termination rule applies to input overflow and other policy closes when a send is in progress. Bound outbound payload size and queued bytes as well as item count; the finite session limit bounds the aggregate budget. Issue #33 defines and verifies the slow-consumer policy. Reset shared update flags only after all eligible observers have had their publication attempt. Do not release identifiers prematurely.
 
 ## Alternatives and consequences
 
@@ -53,7 +53,7 @@ The proposed scheduling policy retains small overruns and resets the deadline af
 
 ## Verification evidence
 
-The developer ran the temporary scheduler and intent queue tests locally on .NET SDK 10.0.403, arm64, Release: 33 passed, zero failed and zero skipped. The prototype is local and not part of this documentation change.
+The developer ran the temporary scheduler and intent queue tests locally on .NET SDK 10.0.403, arm64, Release: 33 passed, zero failed and zero skipped. The original experiments ran locally; the source is now archived separately in #172. It is not part of the normal regression suite.
 
 The sequential intake experiment created 1,000 sessions, used 100 warm-up ticks and 1,000 measured ticks, and wrote then read one integer intent per session per tick. The per-session capacity was 240; the shared channel capacity was 240,000. Both channels used `SingleReader = true`, `SingleWriter = false`, `FullMode = Wait`, and `AllowSynchronousContinuations = false` with nonblocking TryWrite/TryRead. The synchronized queue used a capacity check and FIFO operations under a `Lock`. Each read verified the expected value. A Stopwatch measured only the measured tick loops, excluding setup and warm-up.
 
@@ -65,13 +65,9 @@ The sequential intake experiment created 1,000 sessions, used 100 warm-up ticks 
 
 Earlier per-session channel measurements were 100.910 ms and 32.463 ms total. These results vary with the test environment and are not a throughput guarantee. The saturation test attempted 1,000 parallel writes into a capacity-240 synchronized queue and verified the accepted count, consumed count, value range and uniqueness. It did not compare the exact accepted and consumed sets or guarantee actual contention. The scheduler tests cover the first deadline, overdue execution, deadline calculation including the strict reset threshold, remaining waits and cancellation.
 
-Reproduce the local prototype run while its test files are available:
+Reproduce the experiments using the [archived sources and instructions](https://github.com/berniemackie97/grootscape/tree/269c08cdd218e0875d890a5adf945801e5b0e120/docs/verification/world-tick-spike) at commit `269c08cdd218e0875d890a5adf945801e5b0e120` in #172. The instructions use a temporary worktree and the pinned test project. The `--output Detailed` option is the Microsoft.Testing.Platform runner output option in this repository; the original run printed the three timing results. Merge #172 before accepting this ADR so the evidence is available from main. The comparison is for single-threaded queue operations only; the queue choice follows the ownership and cutoff requirements, not a claim of superior concurrent throughput.
 
-```sh
-dotnet test --project tests/server/Grootscape.Server.Tests/Grootscape.Server.Tests.csproj --configuration Release --output Detailed
-```
-
-The measurements omit simultaneous reads and writes, the common admission gate, allocations, realistic payloads, validation, gameplay, and network publication. #27 must test cutoff, overflow, lifecycle and concurrent correctness; #50 must measure representative end-to-end load. This evidence does not establish production performance or OSRS compatibility.
+The measurements omit simultaneous reads and writes, the common admission gate, allocations, realistic payloads, validation, gameplay, and network publication.#27 must test cutoff, overflow, aggregate limits, lifecycle and concurrent correctness; #50 must measure representative end-to-end load. This evidence does not establish production performance or OSRS compatibility.
 
 ## Sources
 
@@ -89,6 +85,6 @@ Local research MCP was unavailable. No independent OSRS evidence was retrieved f
 - #27: implement scheduler, input ownership, cutoff, overload, priority and M1 session lifecycle; verify concurrent boundary behavior.
 - #29: preserve per-player movement order and emit position changes for publication.
 - #32: implement deterministic replay and the two-client regression.
-- #33: implement nonblocking publication and slow-consumer handling.
+- #33: implement nonblocking publication, bounded output memory and serialized socket termination.
 - #50: measure actual load, including contention and allocation.
 - #105 and #116: review combat-specific disconnect retention before adding it.
