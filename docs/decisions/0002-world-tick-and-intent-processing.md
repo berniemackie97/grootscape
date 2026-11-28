@@ -1,6 +1,8 @@
 # 0002: World tick and intent processing
 
-Status: proposed; owner review required.
+Status: Accepted.
+
+Owner acceptance: [issue #23](https://github.com/berniemackie97/grootscape/issues/23), closed after PRs #172 and #173 merged. Implementation remains in #27.
 
 ## Context
 

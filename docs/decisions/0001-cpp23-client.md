@@ -1,6 +1,8 @@
 # 0001: C++23 client foundation with SDL3
 
-Status: selected for migration; merge requires owner review.
+Status: Accepted.
+
+Evidence: the C++23 foundation is on main at `4f4983d04107cc36e1cd4c91b75de952aed94020`. The owner authorized the migration. See [migration verification](../verification/cpp23-migration.md).
 
 ## Context
 
@@ -16,7 +18,7 @@ Dawn/WebGPU would preserve the former browser backend preference but introduces 
 
 This is an explicit backend compatibility change: browsers use WebGL 2 even when WebGPU exists. Current clear-screen functionality and platform host behavior remain the acceptance boundary. Do not claim backend parity or future 3D performance from clear-screen smoke tests.
 
-## Ownership and failure
+## Consequences and ownership
 
 Use values for wire messages and unique_ptr with SDL deleters for graphics resources. Hosts own lifecycle and windows. No owning raw pointers cross the API. The renderer's window pointer is borrowed and documented. JNI returns a JVM-owned string. C strings have static lifetime. Browser exports keep one session because the page owns one canvas; they catch C++ errors at the C/JavaScript boundary.
 
