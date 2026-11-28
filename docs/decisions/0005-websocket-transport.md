@@ -22,4 +22,4 @@ See [wire protocol](../../protocol/README.md), [architecture](../architecture.md
 
 ## Approval
 
-Retrospective record of the existing contract on main at `4f4983d04107cc36e1cd4c91b75de952aed94020`. Review this record with #21.
+Retrospective approval: repository owner `berniemackie97` merged [foundation PR #7](https://github.com/berniemackie97/grootscape-archive/pull/7) on 2026-11-26. It established the WebSocket endpoint and shared v1 wire contract. The same transport remains in the current protocol specification on main at `4f4983d04107cc36e1cd4c91b75de952aed94020`. The owner merge is approval evidence for the existing foundation, not verification of future client networking.

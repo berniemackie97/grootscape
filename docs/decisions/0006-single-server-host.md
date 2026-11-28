@@ -22,4 +22,4 @@ See [architecture](../architecture.md), [repository rules](../../AGENTS.md), the
 
 ## Approval
 
-Retrospective record of the existing architecture on main at `4f4983d04107cc36e1cd4c91b75de952aed94020`. Review this record with #21.
+Retrospective approval: repository owner `berniemackie97` merged [foundation PR #7](https://github.com/berniemackie97/grootscape-archive/pull/7) on 2026-11-26. It established the single ASP.NET host and separate world and protocol libraries. The project references on main at `4f4983d04107cc36e1cd4c91b75de952aed94020` retain those boundaries. The owner merge is approval evidence for the existing architecture.

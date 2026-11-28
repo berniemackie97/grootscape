@@ -2,7 +2,7 @@
 
 Status: Accepted.
 
-Evidence: the C++23 foundation is on main at `4f4983d04107cc36e1cd4c91b75de952aed94020`. The owner authorized the migration. See [migration verification](../verification/cpp23-migration.md).
+Evidence: the C++23 foundation is on main at `4f4983d04107cc36e1cd4c91b75de952aed94020`. The owner (`berniemackie97`) merged [the migration PR](https://github.com/berniemackie97/grootscape-archive/pull/167) on 2026-11-26 after its owner-approval gate. See [issue #166](https://github.com/berniemackie97/grootscape/issues/166) and [migration verification](../verification/cpp23-migration.md). The merge is the recorded approval evidence; no separate owner review submission is available.
 
 ## Context
 

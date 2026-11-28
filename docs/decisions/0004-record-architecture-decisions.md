@@ -4,7 +4,7 @@ Status: Accepted.
 
 ## Context
 
-Issue #21 requires a durable review process for architecture decisions. The repository already has three numbered decision records in `docs/decisions/`. Existing documentation and issue references link to these paths. Creating another ADR directory would split the decision history; moving the records would break existing links.
+Issue #21 requires a durable review process for architecture decisions. The repository already has three numbered decision records in `docs/decisions/`. Existing documentation and issue references link to these paths. Creating another ADR directory would split the decision history; moving the records would break existing links. The revised acceptance criteria in [issue #21](https://github.com/berniemackie97/grootscape/issues/21) specify the existing directory and record 0004 instead of the initial proposed path and number.
 
 ## Decision
 
