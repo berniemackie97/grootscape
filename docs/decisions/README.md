@@ -7,7 +7,7 @@ Use [the ADR process](0004-record-architecture-decisions.md) and [the template](
 | [0001](0001-cpp23-client.md) | Accepted | C++23 client foundation with SDL3 and WebGL 2 |
 | [0002](0002-world-tick-and-intent-processing.md) | Accepted | World tick and intent processing (#23) |
 | [0003](0003-world-region-format.md) | Proposed | World region source and runtime data (#26) |
-| [0004](0004-record-architecture-decisions.md) | Accepted on merge | ADR process (#21) |
+| [0004](0004-record-architecture-decisions.md) | Accepted | ADR process (#21) |
 | [0005](0005-websocket-transport.md) | Accepted | Shared WebSocket transport |
 | [0006](0006-single-server-host.md) | Accepted | Single deployable server and independent libraries |
 

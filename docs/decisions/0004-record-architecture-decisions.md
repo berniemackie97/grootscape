@@ -1,6 +1,6 @@
 # 0004: Record architecture decisions
 
-Status: Accepted on merge.
+Status: Accepted.
 
 ## Context
 
