@@ -1,6 +1,6 @@
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Channels;
-using System.Diagnostics;
 using Xunit;
 
 namespace Grootscape.Server.Tests;
@@ -226,7 +226,7 @@ public sealed class IntentQueueTests(ITestOutputHelper output)
         HashSet<int> consumed = [];
         while (queue.TryDequeue(out int intent))
         {
-            Assert.InRange(intent,0, attempts - 1);
+            Assert.InRange(intent, 0, attempts - 1);
             Assert.True(consumed.Add(intent));
         }
 
