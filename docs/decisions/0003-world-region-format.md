@@ -1,6 +1,8 @@
 # 0003: World region source and runtime data
 
-Status: proposed for owner review.
+Status: Proposed.
+
+The owner selected the design direction. PR #175 merged the proposal; issue #26 retains the acceptance and compiled fixture exit criteria.
 
 ## Context
 
