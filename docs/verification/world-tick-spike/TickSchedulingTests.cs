@@ -3,6 +3,7 @@ using Xunit;
 
 namespace Grootscape.Server.Tests;
 
+// Research only: the local scheduler is not the hosted WorldLoop.
 public sealed class TickSchedulingTests
 {
     [Fact]

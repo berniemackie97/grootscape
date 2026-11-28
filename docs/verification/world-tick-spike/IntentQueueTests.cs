@@ -5,6 +5,7 @@ using Xunit;
 
 namespace Grootscape.Server.Tests;
 
+// Research only: these tests exercise candidate queues, not the server intake path.
 public sealed class IntentQueueTests(ITestOutputHelper output)
 {
     [Fact]
@@ -52,7 +53,7 @@ public sealed class IntentQueueTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public void MeasuresPerSessionChannelIntake()
+    public void MeasuresSequentialPerSessionChannelIntake()
     {
         const int sessionCount = 1000;
         const int warmupTicks = 100;
@@ -81,7 +82,7 @@ public sealed class IntentQueueTests(ITestOutputHelper output)
 
         TimeSpan elapsed = Stopwatch.GetElapsedTime(started);
 
-        output.WriteLine($"Total duration: {elapsed.TotalMilliseconds:F3} ms");
+        output.WriteLine($"Sequential total duration: {elapsed.TotalMilliseconds:F3} ms");
         output.WriteLine($"Mean tick cost: {elapsed.TotalMilliseconds / measuredTicks:F3} ms");
 
         void RunTicks(int count)
@@ -108,7 +109,7 @@ public sealed class IntentQueueTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public void MeasuresPerSessionQueueIntake()
+    public void MeasuresSequentialPerSessionQueueIntake()
     {
         const int sessionCount = 1000;
         const int warmupTicks = 100;
@@ -129,7 +130,7 @@ public sealed class IntentQueueTests(ITestOutputHelper output)
 
         TimeSpan elapsed = Stopwatch.GetElapsedTime(started);
 
-        output.WriteLine($"Total duration: {elapsed.TotalMilliseconds:F3} ms");
+        output.WriteLine($"Sequential total duration: {elapsed.TotalMilliseconds:F3} ms");
         output.WriteLine($"Mean tick cost: {elapsed.TotalMilliseconds / measuredTicks:F3} ms");
         void RunTicks(int count)
         {
@@ -155,7 +156,7 @@ public sealed class IntentQueueTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public void MeasuresSharedChannelIntake()
+    public void MeasuresSequentialSharedChannelIntake()
     {
         const int sessionCount = 1000;
         const int warmupTicks = 100;
@@ -200,7 +201,7 @@ public sealed class IntentQueueTests(ITestOutputHelper output)
             }
         }
 
-        output.WriteLine($"Total duration: {elapsed.TotalMilliseconds:F3} ms");
+        output.WriteLine($"Sequential total duration: {elapsed.TotalMilliseconds:F3} ms");
         output.WriteLine($"Mean tick cost: {elapsed.TotalMilliseconds / measuredTicks:F3} ms");
     }
 
