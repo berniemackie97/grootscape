@@ -10,11 +10,11 @@ TSPS uses four planes, 64 x 64 tiles, flat collision storage and directional col
 
 ## Decision
 
-Use the [region format v1 contract](../world/region-format-v1.md). Keep source JSON and compiled binary separate. The C# server and C++23 engine read the same documented binary layout. Use an offline .NET 10 compiler with System.Text.Json, explicit little-endian encoding and no new runtime dependency for the first region. Use one validator in the compiler and CI. Runtime readers must still reject invalid binary input.
+Use the [region format v1 contract](../world/region-format-v1.md). Keep source JSON and compiled binary separate. The C# server and C++23 engine read the same documented binary layout. Use an offline .NET 10 compiler with System.Text.Json, explicit little-endian encoding and no new runtime dependency for the first region. Use one validator in the compiler and CI. Runtime readers must still reject invalid binary input and resolve material IDs against the compiled catalog from the same verified build. Verify the exact bytes used for decoding against trusted expected digests. A checksum alone does not authenticate a package. #54 owns the authenticated production manifest and activation policy; the compiler publishes new build directories without replacing earlier output.
 
 Use the canonical format as the document boundary for the future first-party authoring workspace (#161). Do not build a temporary editor or depend on a reference cache at runtime. Tiled or other external editors can export through an importer later; their document models are not the runtime contract. The desktop host and UI framework for #160 remain separate product and dependency decisions; select them before implementing the editor, not as part of the region compiler.
 
-The original fixture contains an authored region, original material colors and expected movement observations. The first compiler slice must compile this fixture and verify reproducibility before #26 is complete. Do not add production world loading or rendering in this spike.
+The original fixture contains an authored region, original material colors and expected movement observations. The first compiler slice must compile the region and material catalog, record their checksums and verify reproducibility before #26 is complete. Do not add production world loading or rendering in this spike.
 
 ## Consequences
 
