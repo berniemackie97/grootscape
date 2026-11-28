@@ -36,6 +36,8 @@ Dependencies point inward. Hosts depend on the engine; the engine depends on no 
 
 The world loop is the single writer of world state. It runs as a hosted service on a `PeriodicTimer` driven by the injected `TimeProvider`, so tests control time. A tick that runs long is logged and counted, and the timer coalesces missed ticks instead of running them back to back. Network handlers will hand player intent to the loop through a queue that the loop drains at the start of each tick; socket and disk I/O stay outside the tick.
 
+The proposed [world tick and intent decision](decisions/0002-world-tick-and-intent-processing.md) defines the next simulation slice. It does not describe behavior implemented in the current host.
+
 Configuration is bound to options classes and validated at startup, so a bad value stops the process before it serves traffic. `appsettings.json` holds the defaults:
 
 | Section | Setting | Default |
