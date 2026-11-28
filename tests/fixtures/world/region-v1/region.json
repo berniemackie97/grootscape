@@ -1,0 +1,277 @@
+{
+  "version": 1,
+  "regionX": -1,
+  "regionY": 0,
+  "provenance": {
+    "origin": "original",
+    "source": "Grootscape region format verification fixture",
+    "revision": "region-v1-fixture-1",
+    "licenseStatus": "pending",
+    "license": null
+  },
+  "planes": [
+    {
+      "defaultHeight": 0,
+      "defaultTile": {
+        "underlay": 1,
+        "overlay": 0,
+        "shape": 0,
+        "rotation": 0,
+        "settings": [
+          "surface"
+        ],
+        "collision": []
+      },
+      "vertices": [
+        {
+          "x": 20,
+          "y": 20,
+          "height": 32
+        },
+        {
+          "x": 20,
+          "y": 21,
+          "height": 64
+        },
+        {
+          "x": 21,
+          "y": 20,
+          "height": 64
+        },
+        {
+          "x": 21,
+          "y": 21,
+          "height": 96
+        }
+      ],
+      "tiles": [
+        {
+          "x": 5,
+          "y": 5,
+          "tile": {
+            "underlay": 1,
+            "overlay": 0,
+            "shape": 0,
+            "rotation": 0,
+            "settings": [
+              "surface"
+            ],
+            "collision": [
+              "floor"
+            ]
+          }
+        },
+        {
+          "x": 10,
+          "y": 10,
+          "tile": {
+            "underlay": 1,
+            "overlay": 0,
+            "shape": 0,
+            "rotation": 0,
+            "settings": [
+              "surface"
+            ],
+            "collision": [
+              "east"
+            ]
+          }
+        },
+        {
+          "x": 11,
+          "y": 10,
+          "tile": {
+            "underlay": 1,
+            "overlay": 0,
+            "shape": 0,
+            "rotation": 0,
+            "settings": [
+              "surface"
+            ],
+            "collision": [
+              "west"
+            ]
+          }
+        },
+        {
+          "x": 14,
+          "y": 15,
+          "tile": {
+            "underlay": 1,
+            "overlay": 0,
+            "shape": 0,
+            "rotation": 0,
+            "settings": [
+              "surface"
+            ],
+            "collision": [
+              "object"
+            ]
+          }
+        },
+        {
+          "x": 20,
+          "y": 20,
+          "tile": {
+            "underlay": 1,
+            "overlay": 2,
+            "shape": 2,
+            "rotation": 1,
+            "settings": [
+              "surface"
+            ],
+            "collision": []
+          }
+        },
+        {
+          "x": 20,
+          "y": 21,
+          "tile": {
+            "underlay": 1,
+            "overlay": 2,
+            "shape": 1,
+            "rotation": 0,
+            "settings": [
+              "surface"
+            ],
+            "collision": []
+          }
+        },
+        {
+          "x": 25,
+          "y": 25,
+          "tile": {
+            "underlay": 1,
+            "overlay": 0,
+            "shape": 0,
+            "rotation": 0,
+            "settings": [
+              "surface"
+            ],
+            "collision": [
+              "northEast"
+            ]
+          }
+        },
+        {
+          "x": 26,
+          "y": 26,
+          "tile": {
+            "underlay": 1,
+            "overlay": 0,
+            "shape": 0,
+            "rotation": 0,
+            "settings": [
+              "surface"
+            ],
+            "collision": [
+              "southWest"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "defaultHeight": 240,
+      "defaultTile": {
+        "underlay": 0,
+        "overlay": 0,
+        "shape": 0,
+        "rotation": 0,
+        "settings": [],
+        "collision": [
+          "floor"
+        ]
+      },
+      "vertices": [],
+      "tiles": [
+        {
+          "x": 8,
+          "y": 8,
+          "tile": {
+            "underlay": 2,
+            "overlay": 0,
+            "shape": 0,
+            "rotation": 0,
+            "settings": [
+              "surface"
+            ],
+            "collision": []
+          }
+        },
+        {
+          "x": 8,
+          "y": 9,
+          "tile": {
+            "underlay": 2,
+            "overlay": 0,
+            "shape": 0,
+            "rotation": 0,
+            "settings": [
+              "surface"
+            ],
+            "collision": []
+          }
+        },
+        {
+          "x": 9,
+          "y": 8,
+          "tile": {
+            "underlay": 2,
+            "overlay": 0,
+            "shape": 0,
+            "rotation": 0,
+            "settings": [
+              "surface"
+            ],
+            "collision": []
+          }
+        },
+        {
+          "x": 9,
+          "y": 9,
+          "tile": {
+            "underlay": 2,
+            "overlay": 0,
+            "shape": 0,
+            "rotation": 0,
+            "settings": [
+              "surface"
+            ],
+            "collision": []
+          }
+        }
+      ]
+    },
+    {
+      "defaultHeight": 480,
+      "defaultTile": {
+        "underlay": 0,
+        "overlay": 0,
+        "shape": 0,
+        "rotation": 0,
+        "settings": [],
+        "collision": [
+          "floor"
+        ]
+      },
+      "vertices": [],
+      "tiles": []
+    },
+    {
+      "defaultHeight": 720,
+      "defaultTile": {
+        "underlay": 0,
+        "overlay": 0,
+        "shape": 0,
+        "rotation": 0,
+        "settings": [],
+        "collision": [
+          "floor"
+        ]
+      },
+      "vertices": [],
+      "tiles": []
+    }
+  ]
+}
