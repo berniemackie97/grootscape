@@ -1,0 +1,3 @@
+# Original region fixture
+
+Region (-1, 0), four planes. The ground plane is grass with a blocked floor, reciprocal cardinal and diagonal walls, a blocked corner, two material overlays and a small slope. Plane 1 has a 2 x 2 surface; planes 2 and 3 have no surface. The expected observations are independent test inputs. The compiler implementation will generate region_-1_0.grg, materials.grm and SHA256SUMS in a new output directory. Commit the verified bytes and checksums together. Tests use the reviewed expected digests and decode the exact verified buffers. These generated files are not present in this proposal. All data is original, test-only, with project license approval pending #20.

@@ -53,6 +53,10 @@ Production logs are JSON on stdout. OpenTelemetry collects ASP.NET Core, runtime
 
 `deploy/server.Dockerfile` publishes the server onto the chiseled ASP.NET image, which has no shell and runs as a non-root user on port 8080.
 
+## World content
+
+The proposed [world region decision](decisions/0003-world-region-format.md) defines the source and binary content contracts for the offline compiler and the two runtime loaders. It does not describe implemented loading behavior. The compiler publishes new build directories; #54 owns authenticated package delivery and activation.
+
 ## Wire protocol
 
 All clients, including the browser, connect with a WebSocket to `/play`. [`protocol/README.md`](../protocol/README.md) specifies the messages and close codes, and `protocol/fixtures/v1.json` holds the exact bytes both codecs test against. Version 1 is the handshake; movement arrives with [#2](https://github.com/berniemackie97/grootscape/issues/2). Codecs translate at each runtime's boundary, so world objects, persistence records, and graphics types stay out of the wire format.

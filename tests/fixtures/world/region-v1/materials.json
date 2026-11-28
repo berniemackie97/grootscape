@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "provenance": {
+    "origin": "original",
+    "source": "Grootscape region format verification fixture",
+    "revision": "region-v1-fixture-1",
+    "licenseStatus": "pending",
+    "license": null
+  },
+  "materials": [
+    {
+      "id": 1,
+      "name": "Fixture grass",
+      "rgba": [
+        84,
+        132,
+        68,
+        255
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Fixture stone",
+      "rgba": [
+        156,
+        149,
+        138,
+        255
+      ]
+    }
+  ]
+}
